@@ -1,0 +1,47 @@
+{
+  "repos" : [
+    {
+      "name": "Vulkan-Headers",
+      "url": "https://github.com/KhronosGroup/Vulkan-Headers.git",
+      "sub_dir": "Vulkan-Headers",
+      "build_dir": "Vulkan-Headers/build",
+      "install_dir": "Vulkan-Headers/build/install",
+      "commit": "v1.2.176"
+    },
+    {
+      "name": "Vulkan-Tools",
+      "url": "https://github.com/KhronosGroup/Vulkan-Tools.git",
+      "sub_dir": "Vulkan-Tools",
+      "build_dir": "Vulkan-Tools/build",
+      "install_dir": "Vulkan-Tools/build/install",
+      "commit": "v1.2.176"
+    },
+    {
+      "name" : "glslang",
+      "url" : "https://github.com/KhronosGroup/glslang.git",
+      "sub_dir" : "glslang",
+      "build_dir" : "glslang/build",
+      "install_dir" : "glslang/build/install",
+      "commit" : "18eef33bd7a4bf5ad8c69f99cb72022608cf6e73",
+      "prebuild" : [
+        "python update_glslang_sources.py"
+      ],
+      "cmake_options" : [
+        "-DUSE_CCACHE=ON"
+      ]
+    },
+    {
+      "name": "SPIRV-Headers",
+      "url": "https://github.com/KhronosGroup/SPIRV-Headers.git",
+      "sub_dir": "SPIRV-Headers",
+      "build_dir": "SPIRV-Headers/build",
+      "install_dir": "SPIRV-Headers/build/install",
+      "commit": "dafead1765f6c1a5f9f8a76387dcb2abe4e54acd"
+    }
+  ],
+  "install_names" : {
+      "Vulkan-Headers" : "VULKAN_HEADERS_INSTALL_DIR",
+      "glslang" : "GLSLANG_INSTALL_DIR",
+      "SPIRV-Headers" : "SPIRV_HEADERS_INSTALL_DIR"
+  }
+}
