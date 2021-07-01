@@ -212,7 +212,7 @@ void VulkanApplication::initVulkan() {
 		createCommandBuffer(&swapChainVector[i]);
 	}
 
-    	setup();
+    setup();
 	createSyncObjects();
 }
 
