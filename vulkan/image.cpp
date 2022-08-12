@@ -89,6 +89,7 @@ void VulkanApplication::generateMipmaps(VkImage image, VkFormat imageFormat, int
     }
 
 Image VulkanApplication::loadTextureImage(const std::string& filename) {
+    std::cout << "Loading " << filename << std::endl;
 	Image image;
 
     int texWidth, texHeight, texChannels;
@@ -115,7 +116,7 @@ Image VulkanApplication::loadTextureImage(const std::string& filename) {
 
     transitionImageLayout(image.textureImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, image.mipLevels);
     copyBufferToImage(stagingBuffer, image.textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
-    transitionImageLayout(image.textureImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, image.mipLevels);
+    transitionImageLayout(image.textureImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, image.mipLevels);
 
     generateMipmaps(image.textureImage, VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, image.mipLevels);
 
@@ -162,7 +163,7 @@ void VulkanApplication::transitionImageLayout(VkImage image, VkFormat format, Vk
 
         sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
         destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-    } else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+    } else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && (newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL || newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)) {
         barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
         barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 

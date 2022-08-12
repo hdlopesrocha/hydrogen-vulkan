@@ -1,7 +1,7 @@
 CC=g++
 SRC=*.cpp vulkan/*.cpp math/*.cpp
 
-VULKAN_SDK_PATH = dependencies/sdk/1.2.176.1/x86_64
+VULKAN_SDK_PATH = dependencies/sdk/1.3.216.0/x86_64
 STB_INCLUDE_PATH = dependencies/stb
 RAPID_JSON_PATH = dependencies/rapidjson
 TINYOBJ_INCLUDE_PATH = dependencies/tinyobjloader

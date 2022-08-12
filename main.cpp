@@ -21,15 +21,17 @@ class SphereContainmentHandler : public ContainmentHandler {
 		}
 
 		ContainmentResult check(BoundingCube cube, Vertex * vertex) {
-			ContainmentResult result = cube.contains(sphere); 
+			ContainmentResult result = sphere.contains(cube); 
 
 			if(result.type == ContainmentType::Intersects) {
 				glm::vec3 c = this->sphere.center;
 				float r = this->sphere.radius;
 				glm::vec3 a = cube.getCenter();
 				glm::vec3 n = glm::normalize(a-c);
+				glm::vec3 p = glm::clamp(c + n*r, cube.getMin(), cube.getMax());
+
 				vertex->normal = n;
-				vertex->pos = glm::clamp(c + n*r, cube.getMin(), cube.getMax());
+				vertex->pos = p;
 				vertex->texIndex = this->texture;
 			}
 			return result;
@@ -52,7 +54,7 @@ class BoxContainmentHandler : public ContainmentHandler {
 		}
 
 		ContainmentResult check(BoundingCube cube, Vertex * vertex) {
-			ContainmentResult result = cube.contains(box); 
+			ContainmentResult result = box.contains(cube); 
 			if(result.type == ContainmentType::Intersects) {
 				glm::vec3 min = this->box.getMin();
 				glm::vec3 max = this->box.getMax();
@@ -76,6 +78,41 @@ class BoxContainmentHandler : public ContainmentHandler {
 		}
 };
 
+class HeightMapContainmentHandler : public ContainmentHandler {
+
+	public:
+		HeightMap * map;
+		unsigned char texture;
+		unsigned char textureOut;
+
+		HeightMapContainmentHandler(HeightMap * m, unsigned char t, unsigned char o) : ContainmentHandler(){
+			this->map = m;
+			this->texture = t;
+			this->textureOut = o;
+		}
+
+		glm::vec3 getCenter() {
+			return map->getCenter();
+		}
+
+		ContainmentResult check(BoundingCube cube, Vertex * vertex) {
+			ContainmentResult result = map->contains(cube); 
+			if(result.type == ContainmentType::Intersects) {
+				glm::vec3 c = cube.getCenter();
+				glm::vec3 a = map->getCenter();
+				glm::vec3 n = glm::normalize(c-a);
+				vertex->pos = c;
+				vertex->normal = n;
+				vertex->texIndex = this->textureOut;
+
+				if(!map->hitsBoundary(cube)) {
+					vertex->pos = map->getPointAt(cube);
+					vertex->texIndex = this->texture;
+				}
+			}
+			return result;
+		}
+};
 
 class HelloTriangleApplication : public VulkanApplication {
 	std::vector<Image> images;
@@ -105,6 +142,16 @@ public:
         images.push_back(loadTextureImage("textures/rock.png"));
         images.push_back(loadTextureImage("textures/snow.png"));
         images.push_back(loadTextureImage("textures/lava.png"));
+        images.push_back(loadTextureImage("textures/dirt.png"));
+        images.push_back(loadTextureImage("textures/grid2.png"));
+
+        images.push_back(loadTextureImage("textures/pixel.jpg"));
+        images.push_back(loadTextureImage("textures/pixel.jpg"));
+        images.push_back(loadTextureImage("textures/pixel.jpg"));
+        images.push_back(loadTextureImage("textures/pixel.jpg"));
+        images.push_back(loadTextureImage("textures/pixel.jpg"));
+        images.push_back(loadTextureImage("textures/pixel.jpg"));
+        images.push_back(loadTextureImage("textures/pixel.jpg"));
     }
  
 	virtual void setup() {
@@ -115,7 +162,10 @@ public:
    	    					* glm::angleAxis(glm::radians(135.0f), glm::vec3(0, 1, 0));  
 		camera.pos = glm::vec3(48,48,48);
 
-		tree = new Octree(1.0);
+		tree = new Octree(2.0);
+
+		HeightMap map(glm::vec3(0,-24,0),glm::vec3(128,0,128), 8, 8);
+		tree->add(new HeightMapContainmentHandler(&map, 8, 7));
 
 		BoundingSphere sph(glm::vec3(0,0,0),20);
 		tree->add(new SphereContainmentHandler(sph, 2));
@@ -149,7 +199,7 @@ public:
 
 		for(int i=0; i < swapChainVector.size() ; ++i){
 			Swap * swap = &swapChainVector[i];
-			for(int i=0 ; i <images.size(); ++i) {
+			for(int i=0 ; i < images.size(); ++i) {
 				bindImage(swap, i, images[i]);		
 			}	
 		}

@@ -11,6 +11,7 @@
 #define WIDTH 1280
 #define HEIGHT 720
 //#define DEBUG 1
+//#define NDEBUG 1
 
 
 #include <stb_image.h>

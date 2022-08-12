@@ -6,7 +6,7 @@
 #include <sstream>
 #include <string>
 #include <fstream>
-
+#include <vector>
 
 enum ContainmentType {
 	Contains,
@@ -83,6 +83,29 @@ enum SpaceType {
     Solid
 };
 
+class BoundingCube {
+	private: 
+		glm::vec3 min;
+		float length;
+
+	public: 
+		BoundingCube(glm::vec3 min, float length);
+		float getMaxX();
+		float getMaxY();
+		float getMaxZ();
+		float getMinX();
+		float getMinY();
+		float getMinZ();
+		glm::vec3 getMin();
+		glm::vec3 getMax();
+		glm::vec3 getCenter();
+		float getLength();
+		void setLength(float l);
+		void setMin(glm::vec3 v);
+		bool contains(glm::vec3 point);
+};
+
+
 class BoundingSphere {
 	public: 
 		glm::vec3 center;
@@ -90,7 +113,10 @@ class BoundingSphere {
 		BoundingSphere();		
 		BoundingSphere(glm::vec3 center, float radius);
 		bool contains(glm::vec3 point);
+		ContainmentResult contains(BoundingCube cube);
+		bool intersects(BoundingCube cube);
 };
+
 
 class BoundingBox {
 	private: 
@@ -112,18 +138,23 @@ class BoundingBox {
 		glm::vec3 getLength();
 		void setMin(glm::vec3 v);
 		void setMax(glm::vec3 v);
-		ContainmentResult contains(BoundingSphere sphere);
+		ContainmentResult contains(BoundingCube cube);
 		bool intersects(BoundingSphere sphere);
 		bool contains(glm::vec3 point);
 };
 
-class BoundingCube {
+class HeightMap {
 	private: 
+		int height;
+		int width;
 		glm::vec3 min;
-		float length;
+		glm::vec3 max;
+		std::vector<std::vector<float>> data; 
 
 	public: 
-		BoundingCube(glm::vec3 min, float length);
+		HeightMap();
+		HeightMap(glm::vec3 min, glm::vec3 max, int width, int height);
+		
 		float getMaxX();
 		float getMaxY();
 		float getMaxZ();
@@ -133,13 +164,20 @@ class BoundingCube {
 		glm::vec3 getMin();
 		glm::vec3 getMax();
 		glm::vec3 getCenter();
-		float getLength();
-		void setLength(float l);
+		glm::vec3 getLength();
 		void setMin(glm::vec3 v);
-		ContainmentResult contains(BoundingSphere sphere);
-		ContainmentResult contains(BoundingBox box);
+		void setMax(glm::vec3 v);
+		float getHeightAt(float x, float z);
+		glm::vec3 getPointAt(BoundingCube cube);
+		
+		float getData(int x, int z);
+		glm::ivec2 getIndexes(float x, float z);
+		glm::vec2 getHeightRangeBetween(BoundingCube cube);
+		bool hitsBoundary(BoundingCube cube);
+
 		bool contains(glm::vec3 point);
-		bool intersects(BoundingSphere sphere);
+		ContainmentResult contains(BoundingCube cube);
+
 };
 
 class ContainmentHandler {
@@ -147,8 +185,6 @@ class ContainmentHandler {
 		virtual ContainmentResult check(BoundingCube cube, Vertex * vertex) = 0;
 		virtual glm::vec3 getCenter() = 0;
 };
-
-
 
 class OctreeNode {
 	public: 
@@ -188,6 +224,9 @@ public:
 	Math();
 	~Math();
 	static bool isBetween(float x, float min, float max);	
+	static int clamp(int val, int min, int max);
+	static float clamp(float val, float min, float max);
+
 
 };
 

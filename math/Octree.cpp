@@ -6,10 +6,6 @@ Octree::Octree(float minSize) : BoundingCube(glm::vec3(0,0,0), minSize){
 	this->minSize = minSize;
 }
 
-int clamp(int val, int min, int max) {
-	return val < min ? min : val > max ? max : val;
-}
-
 BoundingCube getChildCube(BoundingCube cube, int i) {
 	float newLength = 0.5*cube.getLength();
     return BoundingCube(cube.getMin() + newLength * Octree::getShift(i), newLength);
@@ -20,9 +16,9 @@ int getNodeIndex(glm::vec3 vec, BoundingCube cube, bool checkBounds) {
 		return -1;
 	}
 	glm::vec3 diff = (vec - cube.getMin()) / cube.getLength();
-	int px = clamp(round(diff[0]), 0, 1);
-	int py = clamp(round(diff[1]), 0, 1);
-	int pz = clamp(round(diff[2]), 0, 1);
+	int px = Math::clamp(round(diff[0]), 0, 1);
+	int py = Math::clamp(round(diff[1]), 0, 1);
+	int pz = Math::clamp(round(diff[2]), 0, 1);
 	return px * 4 + py * 2 + pz;
 }
 
@@ -60,7 +56,7 @@ void Octree::expand(ContainmentHandler * handler) {
 	while (true) {
 		Vertex vertex(getCenter());
 		ContainmentResult cont = handler->check(*this, &vertex);
-	    if (cont.type == ContainmentType::Contains) {
+	    if (cont.type == ContainmentType::IsContained) {
 	        break;
 	    }
 	
@@ -132,7 +128,7 @@ OctreeNode * delAux(ContainmentHandler * handler, OctreeNode * node, BoundingCub
 	bool isLeaf = !canSplit(cube, minSize);
 
 	if(check.type != ContainmentType::Disjoint) {
-		bool isContained = check.type == ContainmentType::IsContained;
+		bool isContained = check.type == ContainmentType::Contains;
 		bool isIntersecting = check.type == ContainmentType::Intersects;
 
 

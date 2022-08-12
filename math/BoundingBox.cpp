@@ -66,3 +66,52 @@ bool BoundingBox::contains(glm::vec3 point){
         Math::isBetween(point[1], min[1], max[1]) &&
         Math::isBetween(point[2], min[2], max[2]);
 }
+
+ContainmentResult BoundingBox::contains(BoundingCube cube) {
+    ContainmentResult result;
+    result.type = ContainmentType::Intersects;
+    glm::vec3 min1 = cube.getMin();
+    glm::vec3 max1 = cube.getMax();
+    glm::vec3 min2 = getMin();
+    glm::vec3 max2 = getMax();
+
+
+    // Classify corners
+    unsigned char mask = 0;
+    result.mask = 0;
+
+    for(int i=0; i < 8; ++i) {
+        glm::vec3 sh = Octree::getShift(i);
+        glm::vec3 p1(min1 + sh*cube.getLength());
+        glm::vec3 p2(min2 + sh*getLength());
+
+        if(cube.contains(p2)){
+            mask |= (1 << i); 
+        }
+        if(contains(p1)){
+            result.mask |= (1 << i); 
+        }
+    } 
+   
+    // Classifify type
+    if(mask == 0xff) {
+        result.type = ContainmentType::IsContained;
+    }
+    else if(result.mask == 0xff) {
+        result.type = ContainmentType::Contains;
+    }
+    else {
+        for(int i=0 ; i < 3 ; ++i){
+            if(    (min1[i] <= min2[i] && min2[i] <= max1[i]) 
+                || (min1[i] <= max2[i] && max2[i] <= max1[i]) 
+                || (min2[i] <= min1[i] && min1[i] <= max2[i]) 
+                || (min2[i] <= max1[i] && max1[i] <= max2[i])){
+                // overlaps in one dimension
+            } else {
+                result.type = ContainmentType::Disjoint;
+                break;
+            }
+        }
+    }
+    return result;
+}

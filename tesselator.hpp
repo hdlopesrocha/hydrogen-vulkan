@@ -130,7 +130,7 @@ class DebugHandler : public IteratorHandler {
 
 
 		void iterate(int level, OctreeNode * node, BoundingCube cube) {
-			if(!node->leaf  )
+			if(node->leaf  )
 			{
 				addVertex(Vertex(cube.getMin()+cube.getLength()*glm::vec3(0,0,0), glm::vec3(0,0,1), glm::vec2(0,0), getTexture2(node)));
 				addVertex(Vertex(cube.getMin()+cube.getLength()*glm::vec3(1,0,0), glm::vec3(0,0,1), glm::vec2(1,0), getTexture2(node)));
