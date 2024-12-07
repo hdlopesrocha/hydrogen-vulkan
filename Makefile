@@ -1,7 +1,7 @@
 CC=g++
 SRC=*.cpp vulkan/*.cpp math/*.cpp
 
-VULKAN_SDK_PATH = dependencies/sdk/1.3.216.0/x86_64
+VULKAN_SDK_PATH = /usr/include/vulkan
 STB_INCLUDE_PATH = dependencies/stb
 RAPID_JSON_PATH = dependencies/rapidjson
 TINYOBJ_INCLUDE_PATH = dependencies/tinyobjloader
@@ -9,7 +9,7 @@ TINYOBJ_INCLUDE_PATH = dependencies/tinyobjloader
 VK_LAYER_PATH=$(VULKAN_SDK_PATH)/etc/explicit_layer.d
 LD_LIBRARY_PATH=$(VULKAN_SDK_PATH)/lib
 
-CFLAGS = -std=c++11 -g -I$(VULKAN_SDK_PATH)/include -I$(STB_INCLUDE_PATH) -I$(RAPID_JSON_PATH)/include -I$(TINYOBJ_INCLUDE_PATH)
+CFLAGS = -std=c++11 -g -I$(VULKAN_SDK_PATH) -I$(STB_INCLUDE_PATH) -I$(RAPID_JSON_PATH)/include -I$(TINYOBJ_INCLUDE_PATH)
 LDFLAGS = -L$(VULKAN_SDK_PATH)/lib `pkg-config --static --libs glfw3` -lvulkan
 
 compile:
@@ -19,8 +19,8 @@ compile:
 	cp -rf textures bin
 	cp -rf models bin
 
-	$(VULKAN_SDK_PATH)/bin/glslangValidator -V shaders/shader.vert -o bin/shaders/vert.spv
-	$(VULKAN_SDK_PATH)/bin/glslangValidator -V shaders/shader.frag -o bin/shaders/frag.spv
+	glslangValidator -V shaders/shader.vert -o bin/shaders/vert.spv
+	glslangValidator -V shaders/shader.frag -o bin/shaders/frag.spv
 	$(CC) $(CFLAGS) -o bin/vkHelium $(SRC) $(LDFLAGS)
 
 run:

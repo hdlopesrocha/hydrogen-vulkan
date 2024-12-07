@@ -21,6 +21,7 @@
 #include <functional>
 #include <cstdlib>
 #include <vector>
+#include <array>
 #include <map>
 #include <cstring>
 #include <set>
