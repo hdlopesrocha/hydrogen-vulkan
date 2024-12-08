@@ -13,7 +13,6 @@ class TesselatorHandler : public IteratorHandler {
 
 		std::vector<glm::ivec3> tessOrder;
 		std::vector<glm::vec2> tessTex;
-		std::vector<glm::ivec2> tessEdge;
 
 		//      6-----7
 		//     /|    /|
@@ -27,19 +26,19 @@ class TesselatorHandler : public IteratorHandler {
 			this->app = app;
 			this->tree = tree;
 
-			tessOrder.push_back(glm::ivec3(0,3,1));tessEdge.push_back(glm::ivec2(0b00001000,0b10000000));
-			tessOrder.push_back(glm::ivec3(0,2,3));tessEdge.push_back(glm::ivec2(0b00001000,0b10000000));
-			tessOrder.push_back(glm::ivec3(0,6,2));tessEdge.push_back(glm::ivec2(0b01000000,0b10000000));
-			tessOrder.push_back(glm::ivec3(0,4,6));tessEdge.push_back(glm::ivec2(0b01000000,0b10000000));
-			tessOrder.push_back(glm::ivec3(0,5,4));tessEdge.push_back(glm::ivec2(0b00100000,0b10000000));
-			tessOrder.push_back(glm::ivec3(0,1,5));tessEdge.push_back(glm::ivec2(0b00100000,0b10000000));
+			tessOrder.push_back(glm::ivec3(0,3,1));
+			tessOrder.push_back(glm::ivec3(0,2,3));
+			tessOrder.push_back(glm::ivec3(0,6,2));
+			tessOrder.push_back(glm::ivec3(0,4,6));
+			tessOrder.push_back(glm::ivec3(0,5,4));
+			tessOrder.push_back(glm::ivec3(0,1,5));
 
-			tessOrder.push_back(glm::ivec3(0,1,3));tessEdge.push_back(glm::ivec2(0b10000000,0b00001000));
-			tessOrder.push_back(glm::ivec3(0,3,2));tessEdge.push_back(glm::ivec2(0b10000000,0b00001000));
-			tessOrder.push_back(glm::ivec3(0,2,6));tessEdge.push_back(glm::ivec2(0b10000000,0b01000000));
-			tessOrder.push_back(glm::ivec3(0,6,4));tessEdge.push_back(glm::ivec2(0b10000000,0b01000000));
-			tessOrder.push_back(glm::ivec3(0,4,5));tessEdge.push_back(glm::ivec2(0b10000000,0b00100000));
-			tessOrder.push_back(glm::ivec3(0,5,1));tessEdge.push_back(glm::ivec2(0b10000000,0b00100000));
+			//tessOrder.push_back(glm::ivec3(7,6,4));
+			//tessOrder.push_back(glm::ivec3(7,4,5));
+			//tessOrder.push_back(glm::ivec3(7,5,1));
+			//tessOrder.push_back(glm::ivec3(7,1,3));
+			//tessOrder.push_back(glm::ivec3(7,3,2));
+			//tessOrder.push_back(glm::ivec3(7,2,6));
 
 			tessTex.push_back(glm::vec2(0,0));
 			tessTex.push_back(glm::vec2(0,1));
@@ -53,11 +52,10 @@ class TesselatorHandler : public IteratorHandler {
 			}
 			int idx = compactMap[vertex.toString()];
 			indices.push_back(idx);
+		//	std::cout << "i=" << idx << std::endl;
 		}
 
-
-		void iterate(int level, OctreeNode * node, BoundingCube cube) {
-			
+		void iterate(int level, OctreeNode * node, BoundingCube cube) {			
 			if(node->leaf){
 				std::vector<OctreeNode*> corners;
 				// Get corners
@@ -70,22 +68,21 @@ class TesselatorHandler : public IteratorHandler {
 
 				// Tesselate
 				for(int k=0; k<tessOrder.size(); ++k){
-					glm::ivec3 triOrder = tessOrder[k];
-					glm::ivec2 tess = tessEdge[k];
-					if((node->mask & tess[0]) && !(node->mask & tess[1])){
+					glm::ivec3 cornerOrder = tessOrder[k];
 
-						bool accepted = true;
+					if(node->leaf && node->solid == ContainmentType::Intersects){
+						bool accept = true;
 						for(int j=0; j < 3; ++j){
-							OctreeNode * n = corners[triOrder[j]];
-
-							if(n == NULL){
-								accepted = false;
+							OctreeNode * n = corners[cornerOrder[j]];
+							if(n==NULL || n->solid != ContainmentType::Intersects) {
+								accept = false;
 								break;
 							}
-						}		
-						if(accepted) {
+						}
+						
+						if(accept) {
 							for(int j=0; j < 3; ++j){
-								OctreeNode * n = corners[triOrder[j]];
+								OctreeNode * n = corners[cornerOrder[j]];
 								Vertex vtx = n->vertex;
 								vtx.texCoord = tessTex[j];
 								addVertex(vtx);

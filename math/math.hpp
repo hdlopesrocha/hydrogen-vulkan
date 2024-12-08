@@ -189,7 +189,7 @@ class ContainmentHandler {
 class OctreeNode {
 	public: 
 		Vertex vertex;
-		unsigned char mask;
+		ContainmentType solid;
 		bool leaf;
 		OctreeNode *children[8];
 		OctreeNode(Vertex vertex);

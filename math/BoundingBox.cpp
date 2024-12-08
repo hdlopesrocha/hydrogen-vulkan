@@ -78,7 +78,6 @@ ContainmentResult BoundingBox::contains(BoundingCube cube) {
 
     // Classify corners
     unsigned char mask = 0;
-    result.mask = 0;
 
     for(int i=0; i < 8; ++i) {
         glm::vec3 sh = Octree::getShift(i);

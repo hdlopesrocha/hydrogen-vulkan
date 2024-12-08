@@ -82,31 +82,30 @@ bool canSplit(BoundingCube cube, float minSize){
 
 
 OctreeNode * addAux(ContainmentHandler * handler, OctreeNode * node, BoundingCube cube, float minSize) {
-
-	Vertex vertex(cube.getCenter());
-	ContainmentResult check = handler->check(cube, &vertex);
 	bool isLeaf = !canSplit(cube, minSize);
 
+	if(node == NULL) {
+		node = new OctreeNode(cube.getCenter());
+	}
+	ContainmentResult check = handler->check(cube, &node->vertex);
+	node->leaf = isLeaf;
 
-	if(check.type != ContainmentType::Disjoint) {
-		if(node == NULL) {
-			node = new OctreeNode(cube.getCenter());
-		}
+	if(check.type == ContainmentType::Disjoint) {
+		return node;
+	}
+	else if(check.type == ContainmentType::Contains) {
+		node->solid = check.type;
+		node->clear();
+		return node;
+	}
+	else if(check.type == ContainmentType::Intersects) {
+		node->solid = check.type;
+	}
 
-		node->vertex = vertex;
-		node->mask |= check.mask;
-	    node->leaf = isLeaf;
-
-	    if(node->mask == 0xff) {
-	    	node->clear();
-	    	return node;
-	    }
-
-		if(!isLeaf) {
-			for(int i=0; i <8 ; ++i) {
-				BoundingCube subCube = getChildCube(cube,i);
-				node->children[i] = addAux(handler, node->children[i], subCube, minSize);
-			}	
+	if(!isLeaf) {
+		for(int i=0; i <8 ; ++i) {
+			BoundingCube subCube = getChildCube(cube,i);
+			node->children[i] = addAux(handler, node->children[i], subCube, minSize);
 		}
 	}
 	return node;
@@ -116,7 +115,8 @@ void split(OctreeNode * node, BoundingCube cube) {
 	for(int i=0; i <8 ; ++i) {
 		BoundingCube subCube = getChildCube(cube,i);
 		node->children[i] = new OctreeNode(subCube.getCenter());
-		node->children[i]->mask = 0xff;
+		// TODO: Confirm
+		node->children[i]->solid = ContainmentType::Contains;
 	}	
 }
 
@@ -136,17 +136,18 @@ OctreeNode * delAux(ContainmentHandler * handler, OctreeNode * node, BoundingCub
 		// Any full containment results in cleaning
 		if(node == NULL && parentMask == 0xff) {
 			node = new OctreeNode(cube.getCenter());
-			node->mask = 0xff;
+			// TODO: Confirm
+			node->solid = ContainmentType::Contains;
 		}
 
 
 		if(node!= NULL) {
-			if(node->mask == 0xff) {
+		/*	if(node->mask == 0xff) {
 				split(node, cube);
 			}	
 
 			node->mask &= (0xff ^ check.mask);
-		    node->leaf = isLeaf;
+		  */  node->leaf = isLeaf;
 
 			if(isContained) {
 				node->clear();
@@ -163,7 +164,7 @@ OctreeNode * delAux(ContainmentHandler * handler, OctreeNode * node, BoundingCub
 			if(!isLeaf) {
 				for(int i=0; i <8 ; ++i) {
 					BoundingCube subCube = getChildCube(cube,i);
-					node->children[i] = delAux(handler, node->children[i], subCube, minSize, node->mask);
+					node->children[i] = delAux(handler, node->children[i], subCube, minSize, 0xff);
 				}	
 			}
 
@@ -202,7 +203,7 @@ void saveAux(std::ofstream * myfile, OctreeNode * node) {
 		Vertex vertex = node->vertex;
 		*myfile << "\n{";
 		*myfile << "\"v\":" << node->vertex.toString() << ",";
-		*myfile << "\"m\":" << (int) node->mask << ",";
+		*myfile << "\"s\":" << (int) node->solid << ",";
 		*myfile << "\"l\":" << (node->leaf ? "1" : "0");
 		if(node->children != NULL) {
 			for(int i=0; i <8 ; ++i) {

@@ -46,11 +46,10 @@ glm::ivec2 HeightMap::getIndexes(float x, float z) {
     glm::vec3 len = getLength();
     float px =(x-min.x)/len.x;
     float pz =(z-min.z)/len.z;
-    int ix = Math::clamp((int)floor(px * this->width), 0, width);
-    int iz = Math::clamp((int)floor(pz * this->height), 0, height);
+    int ix = Math::clamp((int)floor(px * this->width), 0, width-1);
+    int iz = Math::clamp((int)floor(pz * this->height), 0, height-1);
     return glm::ivec2(ix, iz);
 }
-
 
 glm::vec2 HeightMap::getHeightRangeBetween(BoundingCube cube) {
     glm::ivec2 minIdx = getIndexes(cube.getMin().x, cube.getMin().z);
@@ -82,10 +81,9 @@ glm::vec3 HeightMap::getPointAt(BoundingCube cube) {
 
     glm::vec3 vec = glm::vec3(c.x, h, c.z);
 
-     if( cube.contains(vec)) {
-                return vec;
+    if( cube.contains(vec)) {
+        return vec;
     }
-
     return vec;
 }
 
@@ -160,7 +158,6 @@ bool HeightMap::hitsBoundary(BoundingCube cube) {
 
     ContainmentResult result = box.contains(cube);
 
-
     return result.type == ContainmentType::Intersects && result.mask != 0xf0;
 }
 
@@ -182,14 +179,11 @@ ContainmentResult HeightMap::contains(BoundingCube cube) {
         } 
         result.mask = mask;
 
-
-
         glm::vec2 range = getHeightRangeBetween(cube);
-       // std::cout << range[0] << " ! " << range[1] << std::endl;
+        std::cout << range[0] << " ! " << range[1] << std::endl;
         BoundingBox minBox(getMin(), glm::vec3(getMax().x, range[0], getMax().z ));
         BoundingBox maxBox(getMin(), glm::vec3(getMax().x, range[1], getMax().z ));
         
-
         ContainmentResult minResult = minBox.contains(cube);
         ContainmentResult maxResult = maxBox.contains(cube);
        

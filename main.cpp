@@ -143,7 +143,7 @@ public:
         images.push_back(loadTextureImage("textures/snow.png"));
         images.push_back(loadTextureImage("textures/lava.png"));
         images.push_back(loadTextureImage("textures/dirt.png"));
-        images.push_back(loadTextureImage("textures/grid2.png"));
+        images.push_back(loadTextureImage("textures/grid3.png"));
 
         images.push_back(loadTextureImage("textures/pixel.jpg"));
         images.push_back(loadTextureImage("textures/pixel.jpg"));
@@ -164,26 +164,26 @@ public:
 
 		tree = new Octree(2.0);
 
-		HeightMap map(glm::vec3(0,-24,0),glm::vec3(128,0,128), 8, 8);
-		tree->add(new HeightMapContainmentHandler(&map, 8, 7));
+	//	HeightMap map(glm::vec3(0,0,0),glm::vec3(128,16,128), 8, 8);
+	//	tree->add(new HeightMapContainmentHandler(&map, 8, 7));
 
 		BoundingSphere sph(glm::vec3(0,0,0),20);
-		tree->add(new SphereContainmentHandler(sph, 2));
+		tree->add(new SphereContainmentHandler(sph, 8));
 
 		BoundingSphere sph2(glm::vec3(-11,11,11),10);
-		tree->add(new SphereContainmentHandler(sph2, 5));
+	//	tree->add(new SphereContainmentHandler(sph2, 5));
 
 		BoundingSphere sph3(glm::vec3(11,11,-11),10);
-		tree->del(new SphereContainmentHandler(sph3, 4));
+	//	tree->del(new SphereContainmentHandler(sph3, 4));
 
 		BoundingSphere sph4(glm::vec3(4,4,-4),8);
-		tree->del(new SphereContainmentHandler(sph4, 6));
+	//	tree->del(new SphereContainmentHandler(sph4, 6));
 
 		BoundingSphere sph5(glm::vec3(11,11,-11),4);
-		tree->add(new SphereContainmentHandler(sph5, 3));
+	//	tree->add(new SphereContainmentHandler(sph5, 3));
 
 		BoundingBox box1(glm::vec3(0,-24,0),glm::vec3(24,0,24));
-		tree->add(new BoxContainmentHandler(box1,4));
+	//	tree->add(new BoxContainmentHandler(box1,4));
 
 		TesselatorHandler tesselator(this, tree);
 		tree->iterate(&tesselator);
